@@ -2,10 +2,9 @@ name: Update Realtime Water Level Data
 
 on:
   schedule:
-    # Run daily at 8:00 AM Mountain time 
-    # For 9am Mountain Time (UTC-7), use: cron: '0 16 * * *'
-    # For 9am Eastern Time (UTC-5), use: cron: '0 14 * * *'
+    # Run daily at 8:00 AM and 12:00 PM Mountain time 
     - cron: '0 15 * * *'  # 8:00 AM MT daily
+    - cron: '0 19 * * *' # 12:00 PM MT daily
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
 jobs:
