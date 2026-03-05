@@ -8,8 +8,8 @@ options(tidyhydat.quiet = TRUE)
 
 
 # Load station list
-if(!file.exists("data/MRB_stations.rds")) {
-  stop("ERROR: data/MRB_stations.rds not found.")
+if(!file.exists("data/MRB_NT_stations.rds")) {
+  stop("ERROR: data/MRB_NT_stations.rds not found.")
 }
 
 stations_within_basin <- readRDS("data/MRB_stations.rds")
