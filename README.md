@@ -1,11 +1,11 @@
 # realtime WL data updater
 
-This repo automatically fetches realtime WL data for MRB stations daily 
+This repo automatically fetches realtime WL data for stations daily 
 
 ## Overview
 
 This project runs an R script (update_realtime_data.R) that:
-- fetches realtime WL data for ~320 stations in the Mackenzie River Basin (MRB)
+- fetches realtime WL data for stations in the NWT and Mackenzie River Basin (MRB)
 - saves the data as an RDS file (realtime_WL_data.rds)
 - updates the file in the repo daily
 
