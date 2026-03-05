@@ -23,24 +23,18 @@ jobs:
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
       with:
-        r-version: '4.5.2'  
-        
-    - name: Cache R packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/R/library
-          /usr/local/lib/R/site-library
-          /usr/lib/R/site-library
-        key: ${{ runner.os }}-r-${{ hashFiles('**/.github/workflows/update-realtime-data.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-r-
+        r-version: '4.5.2'  # Updated to match your current R version
     
     - name: Install R dependencies
-      run: |
-        Rscript -e "if (!requireNamespace('tidyhydat', quietly = TRUE)) install.packages('tidyhydat', repos = 'https://cloud.r-project.org')"
-        Rscript -e "if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr', repos = 'https://cloud.r-project.org')"
-        Rscript -e "if (!requireNamespace('lubridate', quietly = TRUE)) install.packages('lubridate', repos = 'https://cloud.r-project.org')"
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: |
+          tidyhydat
+          dplyr
+          lubridate
+        needs: |
+          checkout
+          setup-r
     
     - name: Run data update script
       run: |
