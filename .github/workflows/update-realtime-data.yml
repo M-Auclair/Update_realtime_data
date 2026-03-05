@@ -36,11 +36,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-r-
     
-- name: Install R dependencies
-  run: |
-    Rscript -e "if (!requireNamespace('tidyhydat', quietly = TRUE)) install.packages('tidyhydat', repos = 'https://cloud.r-project.org')"
-    Rscript -e "if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr', repos = 'https://cloud.r-project.org')"
-    Rscript -e "if (!requireNamespace('lubridate', quietly = TRUE)) install.packages('lubridate', repos = 'https://cloud.r-project.org')"
+    - name: Install R dependencies
+      run: |
+        Rscript -e "if (!requireNamespace('tidyhydat', quietly = TRUE)) install.packages('tidyhydat', repos = 'https://cloud.r-project.org')"
+        Rscript -e "if (!requireNamespace('dplyr', quietly = TRUE)) install.packages('dplyr', repos = 'https://cloud.r-project.org')"
+        Rscript -e "if (!requireNamespace('lubridate', quietly = TRUE)) install.packages('lubridate', repos = 'https://cloud.r-project.org')"
     
     - name: Run data update script
       run: |
