@@ -13,6 +13,9 @@ if(!file.exists("data/MRB_NT_station_list.rds")) {
 }
 
 stations_within_basin <- readRDS("data/MRB_NT_station_list.rds")
+#filter to active stations to reduce run time
+stations_within_basin <- stations_within_basin %>%
+  dplyr::filter(HYD_STATUS == "ACTIVE")
 station_list <- unique(stations_within_basin$STATION_NUMBER)
 
 station_list <- station_list[!is.na(station_list)]
