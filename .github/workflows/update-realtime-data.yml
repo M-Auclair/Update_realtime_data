@@ -3,14 +3,12 @@ name: Update Realtime Water Level Data
 on:
   schedule:
     # Run every 2 hours on fixed sched between 6am and 8pm MT
-    - cron: '0 12 * * *' # 6:00 AM MT daily
-    - cron: '0 14 * * *'  # 8:00 AM MT daily
-    - cron: '0 16 * * *'  # 10:00 AM MT
-    - cron: '0 18 * * *' # 12:00 PM MT daily
-    - cron: '0 20 * * *' # 14:00
-    - cron: '0 22 * * *' # 16:00
+    - cron: '0 12 * * *' # 6:00 AM MST daily
+    - cron: '0 15 * * *'  # 9:00 AM MST daily
+    - cron: '0 18 * * *' # 12:00 PM MST daily
+    - cron: '0 21 * * *' # 15:00
     - cron: '0 0 * * *' # 18:00
-    - cron: '0 2 * * *' # 20:00
+    - cron: '0 3 * * *' # 21:00
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
 jobs:

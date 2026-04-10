@@ -6,16 +6,19 @@ library(lubridate)
 
 options(tidyhydat.quiet = TRUE)
 
+# 50 station consecutive failure stop
+MAX_CONSEC_FAIL <- 50L
 
 # Load station list
-if(!file.exists("data/MRB_NT_station_list.rds")) {
-  stop("ERROR: data/MRB_NT_station_list.rds not found.")
+if(!file.exists("data/realtime_station_list.rds")) {
+  stop("ERROR: data/realtime_station_list.rds not found.")
 }
 
-stations_within_basin <- readRDS("data/MRB_NT_station_list.rds")
-#filter to active stations to reduce run time
+# read in active stations
+stations_within_basin <- readRDS("data/realtime_station_list.rds")
+#filter to stations measuring WL
 stations_within_basin <- stations_within_basin %>%
-  dplyr::filter(HYD_STATUS == "ACTIVE")
+  dplyr::filter(has_level == TRUE)
 station_list <- unique(stations_within_basin$STATION_NUMBER)
 
 station_list <- station_list[!is.na(station_list)]
@@ -27,6 +30,7 @@ cat("Start time:", as.character(Sys.time()), "\n\n")
 all_data <- list()
 success_count <- 0
 error_count <- 0
+consec_fail <- 0L
 
 for(i in seq_along(station_list)) {
   station <- station_list[i]
@@ -35,7 +39,7 @@ for(i in seq_along(station_list)) {
     cat(sprintf("Progress: %d of %d stations processed\n", i, length(station_list)))
   }
   
-  tryCatch({
+  outcome <- tryCatch({
     station_data <- tidyhydat::realtime_ws(
       station_number = station,
       parameters = 46,  # Water level
@@ -52,11 +56,27 @@ for(i in seq_along(station_list)) {
       
       all_data[[station]] <- latest
       success_count <- success_count + 1
+      "success"
+    } else{
+      "empty"
     }
   }, error = function(e) {
     error_count <<- error_count + 1
-    # Silently skip stations with errors
+    "error"
   })
+  if(identical(outcome, "success")) {
+    consec_fail <- 0L
+  } else {
+    consec_fail <- consec_fail + 1L
+    if(consec_fail >= MAX_CONSEC_FAIL) {
+      stop(
+        "Halting after ", MAX_CONSEC_FAIL,
+        " consecutive station failures (errors or no rows). ",
+        "Last station: ", station,
+        ". Likely upstream outage or connectivity issue."
+      )
+    }
+  }
 }
 
 cat("\nFetching complete!\n")
@@ -89,3 +109,4 @@ if(length(all_data) > 0) {
 } else {
   stop("No data was successfully retrieved for any stations")
 }
+
