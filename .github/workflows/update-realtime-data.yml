@@ -2,7 +2,7 @@ name: Update Realtime Water Level Data
 
 on:
   schedule:
-    # Run every 2 hours on fixed sched between 6am and 8pm MT
+    # Run every 3 hours on fixed sched between 6am and 9pm MT
     - cron: '0 12 * * *' # 6:00 AM MST daily
     - cron: '0 15 * * *'  # 9:00 AM MST daily
     - cron: '0 18 * * *' # 12:00 PM MST daily
