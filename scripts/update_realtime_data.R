@@ -15,34 +15,51 @@ OUTPUT_FILE <- "data/realtime_WL_data.rds"
 # local tz used to decide daily boundary for full stn list run
 LOCAL_TZ <- Sys.getenv("LOCAL_TZ", unset = "America/Edmonton")
 
+# full run window using local wall-clock
+FULL_RUN_START <- Sys.getenv("FULL_RUN_START", unset = "07:00")
+FULL_RUN_END   <- Sys.getenv("FULL_RUN_END", unset = "12:45")
+
 # Load station list
-if(!file.exists("data/realtime_station_list.rds")) {
+if(!file.exists(STATION_FILE)) {
   stop("ERROR: data/realtime_station_list.rds not found.")
 }
 
 # read in active stations
-stations_within_basin <- readRDS("data/realtime_station_list.rds")
+stations_within_basin <- readRDS(STATION_FILE)
 #filter to stations measuring WL
 stations_within_basin <- stations_within_basin %>%
   dplyr::filter(has_level == TRUE)
 
 today_local <- as.Date(with_tz(Sys.time(), tzone = LOCAL_TZ))
+now_local <- with_tz(Sys.time(), tzone = LOCAL_TZ)
+
+t_start <- as.POSIXct(
+  paste(as.character(today_local), FULL_RUN_START),
+  tz = LOCAL_TZ
+)
+t_end <- as.POSIXct(
+  paste(as.character(today_local), FULL_RUN_END),
+  tz = LOCAL_TZ
+)
+if (any(is.na(t_start), is.na(t_end)) || t_end <= t_start) {
+  stop("Invalid FULL_RUN_START / FULL_RUN_END for LOCAL_TZ=", LOCAL_TZ)
+}
+in_full_window <- (now_local >= t_start) && (now_local < t_end)
 existing_data <- NULL
 last_full_refresh_date <- as.Date(NA)
-
 if (file.exists(OUTPUT_FILE)) {
   existing_data <- readRDS(OUTPUT_FILE)
-  # recover last full refresh date if available
   existing_attr <- attr(existing_data, "last_full_refresh_date")
   if (!is.null(existing_attr) && !is.na(existing_attr)) {
     last_full_refresh_date <- as.Date(existing_attr)
   }
 }
+already_full_today <- !is.na(last_full_refresh_date) && identical(last_full_refresh_date, today_local)
 
-# Full run if no prior output exists, no recorded full refresh data, or recorded date is before today 
+# Full run if local time is inside local wall clock window  
 is_full_run <- is.null(existing_data) ||
   is.na(last_full_refresh_date) ||
-  last_full_refresh_date < today_local
+  (!already_full_today && in_full_window)
 
 if (is_full_run) {
   target_stations <- stations_within_basin %>%
@@ -63,6 +80,17 @@ station_list <- station_list[!is.na(station_list)]
 cat("Run mode:", run_mode, "\n")
 cat("Timezone for daily logic:", LOCAL_TZ, "\n")
 cat("Today (local):", as.character(today_local), "\n")
+cat(
+  "Full-run window (local): [",
+  format(t_start, "%Y-%m-%d %H:%M %Z"),
+  ", ",
+  format(t_end, "%Y-%m-%d %H:%M %Z"),
+  ")\n",
+  sep = ""
+)
+cat("Now (local):", format(now_local, "%Y-%m-%d %H:%M:%S %Z"), "\n")
+cat("In full-run window:", in_full_window, "\n")
+cat("Already full today:", already_full_today, "\n")
 cat("Fetching realtime data for", length(station_list), "stations...\n")
 cat("Start time:", as.character(Sys.time()), "\n\n")
 
@@ -170,6 +198,8 @@ attr(realtime_data, "failed_fetches") <- error_count
 attr(realtime_data, "run_mode") <- run_mode
 attr(realtime_data, "last_full_refresh_date") <- as.character(last_full_refresh_date_out)
 attr(realtime_data, "local_timezone_for_daily_logic") <- LOCAL_TZ
+attr(realtime_data, "full_run_window_start") <- FULL_RUN_START
+attr(realtime_data, "full_run_window_end") <- FULL_RUN_END
 
 saveRDS(realtime_data, OUTPUT_FILE)
 
