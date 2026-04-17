@@ -3,11 +3,13 @@ name: Update Realtime Water Level Data
 on:
   schedule:
     # Run every ~ 3 hours on fixed sched
+    - cron: '21 10 * * *' # 4:21 AM MDT
     - cron: '21 13 * * *' # 7:21 AM MDT
     - cron: '21 16 * * *' # 10:21 AM MDT
     - cron: '21 19 * * *' # 1:21 PM MDT
     - cron: '21 22 * * *' # 4:21 PM MDT
     - cron: '21 1 * * *'  # 7:21 PM MDT
+    - cron: '21 4 * * *'  # 10:21 PM MDT
   workflow_dispatch:  
 
 jobs:
