@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      contents: write  # Required to push commits
+      contents: write  
     
     steps:
     - name: Checkout repository
@@ -31,19 +31,17 @@ jobs:
       with:
         r-version: '4.5.3'  
     
-    - name: Install R dependencies
+    - name: Install deps
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
         packages: |
           tidyhydat
           dplyr
           lubridate
-        needs: |
-          checkout
-          setup-r
+          tibble
     
     - name: Run data update script
-      timeout-minutes: 45
+      timeout-minutes: 60
       run: |
         Rscript scripts/update_realtime_data.R
       env:
